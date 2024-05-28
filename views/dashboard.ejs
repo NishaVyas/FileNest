@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style2.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+</head>
+
+<body>
+  <div class="container">
+    <h2>Uploaded Files and Folders</h2>
+    <!-- New button -->
+    <button id="newButton" class="newButton">New</button>
+
+    <!-- Modal for New -->
+    <div id="newModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <button id="uploadBtn">Upload File</button>
+        <button id="createFolderBtn">Create Folder</button>
+      </div>
+    </div>
+
+    <!-- Modal for Upload File -->
+    <div id="uploadModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <!-- Form for upload file -->
+        <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+          <input type="file" name="file">
+          <button type="submit">Upload File</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for Create Folder -->
+    <div id="folderModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <!-- Form for create folder -->
+        <form id="createFolderForm" action="/createFolder" method="POST">
+          <input type="text" name="folderName" placeholder="Folder Name">
+          <button type="submit">Create Folder</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Popup form for renaming -->
+    <div id="renameModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="hideRenameModal()">&times;</span>
+        <form id="renameForm" action="/rename" method="POST">
+          <input type="hidden" id="itemId" name="itemId"> <!-- Hidden input to store the item ID -->
+          <input type="text" id="newName" name="newName" placeholder="New Name">
+          <button type="submit">Rename</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Dashboard template -->
+    <ul class="file-list">
+      <% items.forEach(function(item) { %>
+        <li>
+          <% if (item.type==='file' ) { %>
+            <!-- If it's a file -->
+            <div class="file-item">
+              <i class="fas fa-file"></i> <!-- File icon -->
+              <a href="<%= item.path %>" style="text-decoration: none;">
+                <%= item.name %>
+              </a>
+              <!-- Three dots dropdown menu -->
+              <div class="dropdown">
+                <button class="dropbtn" onclick="toggleDropdown(this)">&#x22EE;</button>
+                <div class="dropdown-content">
+                  <a href="#" class="download-btn" data-file-name="<%= item.name %>">Download</a>
+
+                  <% if (item.user_id===loggedInUserId) { %>
+                    <!-- Show delete button only if the item belongs to the current user -->
+                    <a href="#" onclick="deleteItem('<%= item.item_id %>')">Delete</a>
+                    <% } %>
+                      <a href="#" onclick="showRenameModal('<%= item.item_id %>', '<%= item.name %>')">Rename</a>
+                      <!-- Pass item ID and name -->
+                </div>
+              </div>
+            </div>
+            <% } else if (item.type==='folder' ) { %>
+              <!-- If it's a folder -->
+              <div class="folder-item">
+                <i class="fas fa-folder"></i> <!-- Folder icon -->
+                <a href="/<%= item.name %>/folderContent" style="text-decoration: none; ">
+                  <span>
+                    <%= item.name %>
+                  </span>
+                </a>
+                <!-- Three dots dropdown menu for folders -->
+                <div class="dropdown">
+                  <button class="dropbtn" onclick="toggleDropdown(this)">&#x22EE;</button>
+                  <div class="dropdown-content">
+                    <% if (item.user_id===loggedInUserId) { %>
+                      <!-- Show delete button only if the item belongs to the current user -->
+                      <a href="#" onclick="deleteItem('<%= item.item_id %>')">Delete</a>
+                      <% } %>
+                        <a href="#" onclick="showRenameModal('<%= item.item_id %>', '<%= item.name %>')">Rename</a>
+                        <!-- Pass item ID and name -->
+                  </div>
+                </div>
+              </div>
+              <% } %>
+        </li>
+        <% }); %>
+    </ul>
+    <div class="logout">
+      <form action="/logout" method="POST">
+        <button type="submit" class="button-48"><span class="text"><b>Logout</b></span></button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Get the modals and the button
+    var newModal = document.getElementById("newModal");
+    var newButton = document.getElementById("newButton");
+    var uploadModal = document.getElementById("uploadModal");
+    var folderModal = document.getElementById("folderModal");
+    var renameModal = document.getElementById("renameModal");
+
+    // When the user clicks the button, open the modal
+    newButton.onclick = function () {
+      newModal.style.display = "block";
+    }
+
+    // When the user clicks on the close button, close the modal
+    var closeButtons = document.getElementsByClassName("close");
+    for (var i = 0; i < closeButtons.length; i++) {
+      closeButtons[i].onclick = function () {
+        newModal.style.display = "none";
+        uploadModal.style.display = "none";
+        folderModal.style.display = "none";
+        renameModal.style.display = "none"; // Close rename modal if open
+      }
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+      if (event.target == newModal || event.target == uploadModal || event.target == folderModal || event.target == renameModal) {
+        newModal.style.display = "none";
+        uploadModal.style.display = "none";
+        folderModal.style.display = "none";
+        renameModal.style.display = "none"; // Close rename modal if open
+      }
+    }
+
+    // Show upload modal
+    document.getElementById("uploadBtn").onclick = function () {
+      newModal.style.display = "none";
+      uploadModal.style.display = "block";
+    };
+
+    // Show create folder modal
+    document.getElementById("createFolderBtn").onclick = function () {
+      newModal.style.display = "none";
+      folderModal.style.display = "block";
+    };
+
+    // Toggle dropdown menu
+    function toggleDropdown(btn) {
+      var dropdownContent = btn.nextElementSibling;
+      dropdownContent.classList.toggle("show");
+    }
+
+    function showRenameModal(itemId, itemName) {
+      var newNameInput = document.getElementById("newName");
+      var itemIdInput = document.getElementById("itemId");
+
+      // Set the previous name in the form text
+      newNameInput.value = itemName;
+
+      // Set the item ID
+      itemIdInput.value = itemId;
+
+      // Show modal
+      renameModal.style.display = "block";
+      event.preventDefault(); // Prevent default action of the anchor tag
+    }
+    // Hide rename modal
+    function hideRenameModal() {
+      renameModal.style.display = "none";
+    }
+
+    // Function to delete item
+    function deleteItem(itemId) {
+      if (confirm("Are you sure you want to delete this item?")) {
+        fetch(`/deleteItem/${itemId}`, {
+          method: 'DELETE',
+        })
+          .then(response => {
+            if (response.ok) {
+              location.reload(); // Reload page after successful deletion
+            } else {
+              throw new Error('Failed to delete item');
+            }
+          })
+          .catch(error => {
+            console.error('Error deleting item:', error);
+            alert('Failed to delete item. Please try again later.');
+          });
+      }
+      event.preventDefault(); // Prevent default action of the anchor tag
+    }
+
+
+
+    // Function to trigger file download
+    function downloadFile(fileName) {
+      const url = `/uploads/${encodeURIComponent(fileName)}`;
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    // Attach event listener to download buttons
+    document.querySelectorAll('.download-btn').forEach(button => {
+      button.addEventListener('click', function (event) {
+        const fileName = this.dataset.fileName;
+        downloadFile(fileName);
+        event.preventDefault();
+      });
+    });
+
+  </script>
+</body>
+
+</html>

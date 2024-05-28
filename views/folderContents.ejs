@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Folder Content</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 35px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .file-upload-form {
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+
+    .file-upload-form input[type="file"] {
+      margin-bottom: 10px;
+    }
+
+    .file-upload-form button[type="submit"] {
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .file-upload-form button[type="submit"]:hover {
+      background-color: #45a049;
+    }
+
+    .file-list {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .file-list li {
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 5px;
+      position: relative;
+    }
+
+    .file-list li:hover {
+      background-color: #e9e9e9;
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #f9f9f9;
+      min-width: 120px;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+      border-radius: 5px;
+    }
+
+    .dropdown-content a {
+      display: block;
+      padding: 10px;
+      text-decoration: none;
+      color: #333;
+    }
+
+    .dropdown-content a:hover {
+      background-color: #f1f1f1;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    .dropdown .dropbtn {
+      background-color: transparent;
+      border: none;
+      color: #666;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .dropdown .dropbtn:hover {
+      color: #333;
+    }
+
+    @media screen and (max-width: 800px) {
+      .dropdown-content {
+        position: relative;
+      }
+
+      .dropdown,
+      .dropbtn {
+        width: 30%;
+        display: block;
+      }
+    }
+
+    /* Popup container */
+    .popup {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    /* Popup content */
+    .popup-content {
+      background-color: #fefefe;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      border-radius: 5px;
+    }
+
+    /* Close button */
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* Logout button */
+    .logout {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+    }
+
+    .button-48 {
+
+      display: grid;
+      justify-content: right;
+      appearance: none;
+      background-color: #FFFFFF;
+      border-width: 0;
+      box-sizing: border-box;
+      color: #000000;
+      cursor: pointer;
+      font-family: Clarkson, Helvetica, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0;
+      line-height: 1em;
+      margin: 0;
+      opacity: 1;
+      outline: 0;
+      padding: 1em 1.7em;
+      position: relative;
+      text-align: center;
+      text-decoration: none;
+      text-rendering: geometricprecision;
+      text-transform: uppercase;
+      transition: opacity 300ms cubic-bezier(.694, 0, 0.335, 1), background-color 100ms cubic-bezier(.694, 0, 0.335, 1), color 100ms cubic-bezier(.694, 0, 0.335, 1);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      vertical-align: baseline;
+      white-space: nowrap;
+    }
+
+    .button-48:before {
+      animation: opacityFallbackOut .5s step-end forwards;
+      backface-visibility: hidden;
+      background-color: #EBEBEB;
+      clip-path: polygon(-1% 0, 0 0, -25% 100%, -1% 100%);
+      content: "";
+      height: 100%;
+      left: 0;
+      position: absolute;
+      top: 0;
+      transform: translateZ(0);
+      transition: clip-path .5s cubic-bezier(.165, 0.84, 0.44, 1), -webkit-clip-path .5s cubic-bezier(.165, 0.84, 0.44, 1);
+      width: 100%;
+    }
+
+    .button-48:hover:before {
+      animation: opacityFallbackIn 0s step-start forwards;
+      clip-path: polygon(0 0, 101% 0, 101% 101%, 0 101%);
+    }
+
+    .button-48:after {
+      background-color: #FFFFFF;
+      color: #080808;
+    }
+
+    .button-48 span {
+      z-index: 1;
+      position: relative;
+    }
+
+
+    /* Cursor pointer class */
+    .cursor-pointer {
+      cursor: pointer;
+    }
+
+    .file-list i {
+      margin-left: 5px;
+      color: #ffd445;
+    }
+
+    /* Adjust icon size */
+    .fa-file {
+      font-size: 18px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h4 id="dashboardLink" class="cursor-pointer">Dashboard / <%= folderName %>
+    </h4>
+
+    <div class="file-upload-form">
+      <h2>Upload Files</h2>
+      <form action="/<%= folderName %>/uploadFolder" method="post" enctype="multipart/form-data">
+        <input type="file" name="files" multiple>
+        <button type="submit">Upload Files</button>
+      </form>
+    </div>
+
+    <% if (files.length> 0) { %>
+      <h3>Files:</h3>
+      <ul class="file-list">
+        <% files.forEach(file=> { %>
+          <li>
+            <i class="fas fa-file"></i> <!-- File icon -->
+            <%= file.name %>
+              <div class="dropdown">
+                <button class="dots">&#8942;</button>
+                <div class="dropdown-content">
+                  <a href="#" class="download-btn" data-file-name="<%= file.name %>">Download</a>
+                  <% if (file.user_id===loggedInUserId) { %>
+                    <!-- Show delete button only if the uploader ID matches the current user ID -->
+                    <a href="#" onclick="deleteFile('<%= file.name %>')">Delete</a>
+                    <% } %>
+                </div>
+              </div>
+          </li>
+          <% }); %>
+      </ul>
+      <% } else { %>
+        <p>No files found in this folder.</p>
+        <% } %>
+
+          <!-- Logout button -->
+          <div class="logout">
+            <form action="/logout" method="POST">
+              <button type="submit" class="button-48"><span class="text"><b>Logout</b></span></button>
+            </form>
+          </div>
+  </div>
+
+  <script>
+    // Get the currently logged-in user ID from the server side
+    const loggedInUserId = '<%= loggedInUserId %>';
+
+    // Function to delete a file
+    function deleteFile(fileName) {
+      if (confirm("Are you sure you want to delete this item?")) {
+        fetch(`/<%= folderName %>/deleteFile/${encodeURIComponent(fileName)}`, {
+          method: 'DELETE'
+        })
+          .then(response => {
+            if (response.ok) {
+              // If deletion is successful, reload the page to reflect changes
+              location.reload();
+            } else {
+              // Handle deletion failure
+              console.error('Failed to delete file:', response.statusText);
+              alert('Failed to delete file.');
+            }
+          })
+          .catch(error => {
+            console.error('Error deleting file:', error);
+            alert('An error occurred while deleting the file.');
+          });
+      }
+
+    }
+
+    // Function to redirect to the dashboard page
+    document.getElementById('dashboardLink').addEventListener('click', function () {
+      window.location.href = '/dashboard';
+    });
+
+    // // Function to trigger file download
+    // function downloadFile(fileName) {
+    //   window.location.href = '/uploads/<%= folderName %>/' + fileName;
+    // }
+
+
+    function downloadFile(fileName) {
+      const url = `/uploads/<%=folderName%>/${encodeURIComponent(fileName)}`;
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    // Attach event listener to download buttons
+    document.querySelectorAll('.download-btn').forEach(button => {
+      button.addEventListener('click', function (event) {
+        const fileName = this.dataset.fileName;
+        downloadFile(fileName);
+        event.preventDefault();
+      });
+    });
+  </script>
+</body>
+
+</html>
